@@ -37,6 +37,8 @@ class Student(db.Model):
     fees = db.relationship('Fee', backref='student', lazy=True)
     appointments = db.relationship('Appointment', backref='student', lazy=True)
     payments = db.relationship('MpesaPayment', backref='student', lazy=True)
+    dorm_assignment = db.relationship('DormAssignment', backref='student', uselist=False)
+    enrollments = db.relationship('Enrollment', backref='student', lazy=True)
 
     def to_dict(self):
         return {
@@ -142,13 +144,12 @@ class Result(db.Model):
             "score": self.score
         }
 
-# --- Attendance Model ---
-# models.py
+
 class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
     date = db.Column(db.Date, nullable=False)
-    status = db.Column(db.String(10))  # Present / Absent / Late etc.
+    status = db.Column(db.String(10))  
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'))
 
     student = db.relationship('Student', backref='attendances')
@@ -240,4 +241,135 @@ class Report(db.Model):
             "results": [r.to_dict() for r in self.results],
             "fee_statement": self.fee_statement.to_dict() if self.fee_statement else None
         }
+    
+class Book(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(120), nullable=False)
+    author = db.Column(db.String(100), nullable=False)
+    isbn = db.Column(db.String(50), unique=True, nullable=False)
+    total_copies = db.Column(db.Integer, nullable=False)
+    available_copies = db.Column(db.Integer, nullable=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "author": self.author,
+            "isbn": self.isbn,
+            "total_copies": self.total_copies,
+            "available_copies": self.available_copies
+        }
+
+class BorrowRecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
+    borrowed_on = db.Column(db.DateTime, default=datetime.utcnow)
+    returned_on = db.Column(db.DateTime, nullable=True)
+    fine = db.Column(db.Float, default=0.0)
+
+    student = db.relationship('Student', backref='borrow_records')
+    book = db.relationship('Book', backref='borrow_records')
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "student_id": self.student_id,
+            "book_id": self.book_id,
+            "borrowed_on": self.borrowed_on.isoformat(),
+            "returned_on": self.returned_on.isoformat() if self.returned_on else None,
+            "fine": self.fine
+        }
+
+
+class DormRoom(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    
+    capacity = db.Column(db.Integer, nullable=False)
+    current_occupants = db.Column(db.Integer, default=0)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+        
+            "capacity": self.capacity,
+            "current_occupants": self.current_occupants
+        }
+
+class DormAssignment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+    dorm_id = db.Column(db.Integer, db.ForeignKey('dorm_room.id'), nullable=False)
+    assigned_on = db.Column(db.DateTime, default=datetime.utcnow)
+    left_on = db.Column(db.DateTime, nullable=True)
+
+    student = db.relationship('Student', backref='dorm_assignment')
+    dorm = db.relationship('DormRoom', backref='assignments')
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "student_id": self.student_id,
+            "dorm_id": self.dorm_id,
+            "assigned_on": self.assigned_on.isoformat(),
+            "left_on": self.left_on.isoformat() if self.left_on else None
+        }
+
+
+class Department(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+
+    teachers = db.relationship('Teacher', backref='department', lazy=True)
+    courses = db.relationship('Course', backref='department', lazy=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name
+        }
+
+class Teacher(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "department_id": self.department_id
+        }
+
+class Course(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    is_compulsory = db.Column(db.Boolean, default=False)
+    group_name = db.Column(db.String(50), nullable=True)  
+    department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
+
+    enrollments = db.relationship('Enrollment', backref='course', lazy=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "is_compulsory": self.is_compulsory,
+            "group_name": self.group_name,
+            "department_id": self.department_id
+        }
+class Enrollment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "student_id": self.student_id,
+            "course_id": self.course_id
+        }
+
 
