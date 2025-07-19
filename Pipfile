@@ -9,10 +9,11 @@ flask-sqlalchemy = "*"
 flask-cors = "*"
 psycopg2-binary = "*"
 reportlab = "*"
-flask-migrate = "*"
 flask-jwt-extended = "*"
 python-dotenv = "*"
 sqlalchemy = "*"
+cloudinary = "*"
+flask-migrate = "*"
 
 [dev-packages]
 

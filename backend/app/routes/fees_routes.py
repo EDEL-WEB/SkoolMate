@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify
-from app.models import db, Fee
+from backend.app.models import db, Fee
 from flask_jwt_extended import jwt_required
-from app.auth import admin_required
+from backend.app.utils.decorators import teacher_required
+from backend.app.utils.decorators import admin_required
+
 
 fees_bp = Blueprint('fees_routes', __name__)
 

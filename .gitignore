@@ -1,0 +1,48 @@
+# Bytecode and cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+env/
+.SkoolMate/  # if you're using a named virtualenv
+.SkoolMate*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Flask / Python
+instance/
+.env
+*.env
+*.sqlite3
+*.db
+
+# Alembic migrations
+migrations/
+
+# Logs and runtime
+*.log
+
+# Pytest and coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.cache/
+
+# VSCode / IDEs
+.vscode/
+.idea/
+*.swp
+
+# Node / React (if full-stack)
+node_modules/
+build/
+dist/
+
+# Others (optional)
+*.bak
+*.tmp
+*.orig

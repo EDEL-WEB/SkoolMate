@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required
-from app.models import Subject
+from backend.app.models import Subject
 
 department_bp = Blueprint('department_routes', __name__)
 

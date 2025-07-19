@@ -1,7 +1,10 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
-from app.models import db, Report, Fee  # <-- Add Fee here
-from app.auth import teacher_required, admin_required
+from backend.app.models import db, Report, Fee  # <-- Add Fee here
+from backend.app.utils.decorators import teacher_required
+from backend.app.utils.decorators import admin_required
+
+from backend.app.utils.cloudinary_uploads import upload_image_to_cloudinary
 
 report_bp = Blueprint('report_routes', __name__)
 
@@ -53,8 +56,24 @@ def create_report():
 @teacher_required
 def update_report(id):
     report = Report.query.get_or_404(id)
-    data = request.get_json()
+
+    # Support both JSON and multipart/form-data
+    if request.content_type and request.content_type.startswith('multipart/form-data'):
+        data = request.form
+    else:
+        data = request.get_json() or {}
+
+    # Update fields as needed
     report.score = data.get('score', report.score)
+    report.term = data.get('term', report.term)
+    report.year = data.get('year', report.year)
+
+    # Handle image upload if present
+    if 'image' in request.files:
+        file = request.files['image']
+        image_url = upload_image_to_cloudinary(file)
+        report.image_url = image_url
+
     db.session.commit()
     return jsonify(report.to_dict()), 200
 

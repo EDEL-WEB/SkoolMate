@@ -29,8 +29,9 @@ class Student(db.Model):
     full_name = db.Column(db.String(100), nullable=False)
     gender = db.Column(db.String(10))
     date_of_birth = db.Column(db.Date)
-    parent_contact = db.Column(db.String(20))  # e.g. phone number
+    parent_contact = db.Column(db.String(20))
     classroom_id = db.Column(db.Integer, db.ForeignKey('classroom.id'))
+    image_url = db.Column(db.String(255), nullable=True)
 
     results = db.relationship('Result', backref='student', lazy=True)
     attendance_records = db.relationship('Attendance', backref='student', lazy=True)
@@ -48,7 +49,8 @@ class Student(db.Model):
             "gender": self.gender,
             "date_of_birth": self.date_of_birth.isoformat() if self.date_of_birth else None,
             "parent_contact": self.parent_contact,
-            "classroom_id": self.classroom_id
+            "classroom_id": self.classroom_id,
+            "image_url": self.image_url
         }
 
 # --- Teacher Model ---
@@ -56,31 +58,41 @@ class Teacher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     full_name = db.Column(db.String(100), nullable=False)
+    image_url = db.Column(db.String(255), nullable=True)
+
     subjects = db.relationship('Subject', backref='teacher', lazy=True)
     appointments = db.relationship('Appointment', backref='teacher', lazy=True)
+    attendance_records = db.relationship('Attendance', backref='teacher', lazy=True)
 
     def to_dict(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "full_name": self.full_name
+            "full_name": self.full_name,
+            "image_url": self.image_url
         }
 
 # --- Classroom Model ---
 class Classroom(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)  # e.g. Grade 8A
+    name = db.Column(db.String(50), nullable=False)
+
     students = db.relationship('Student', backref='classroom', lazy=True)
     subjects = db.relationship('Subject', backref='classroom', lazy=True)
 
-    def to_dict(self):from app import db
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name
+        }
 
+# --- Appointment Model ---
 class Appointment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
-    date = db.Column(db.String(120), nullable=False)  # Format: "2025-07-20"
-    time = db.Column(db.String(10), nullable=False)   # Format: "10:30 AM"
+    date = db.Column(db.String(120), nullable=False)
+    time = db.Column(db.String(10), nullable=False)
     reason = db.Column(db.String(255), nullable=True)
 
     def to_dict(self):
@@ -91,11 +103,6 @@ class Appointment(db.Model):
             "date": self.date,
             "time": self.time,
             "reason": self.reason
-        }
-
-        return {
-            "id": self.id,
-            "name": self.name
         }
 
 # --- Subject Model ---
@@ -116,7 +123,7 @@ class Subject(db.Model):
 # --- Exam Model ---
 class Exam(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))  # e.g. Term 1 Midterm
+    name = db.Column(db.String(100))
     date = db.Column(db.DateTime, default=datetime.utcnow)
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'))
     results = db.relationship('Result', backref='exam', lazy=True)
@@ -144,16 +151,13 @@ class Result(db.Model):
             "score": self.score
         }
 
-
+# --- Attendance Model ---
 class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
-    date = db.Column(db.Date, nullable=False)
-    status = db.Column(db.String(10))  
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'))
-
-    student = db.relationship('Student', backref='attendances')
-    teacher = db.relationship('Teacher', backref='attendance_records')
+    date = db.Column(db.Date, nullable=False)
+    status = db.Column(db.String(10))
 
     def to_dict(self):
         return {
@@ -163,7 +167,6 @@ class Attendance(db.Model):
             "status": self.status,
             "teacher": self.teacher.to_dict()
         }
-
 
 # --- Fee Model ---
 class Fee(db.Model):
@@ -182,26 +185,7 @@ class Fee(db.Model):
             "is_paid": self.is_paid
         }
 
-# --- Appointment Model ---
-class Appointment(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
-    teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
-    date = db.Column(db.String(120), nullable=False)  # Format: "2025-07-20"
-    time = db.Column(db.String(10), nullable=False)   # Format: "10:30 AM"
-    reason = db.Column(db.String(255), nullable=True)
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "student_id": self.student_id,
-            "teacher_id": self.teacher_id,
-            "date": self.date,
-            "time": self.time,
-            "reason": self.reason
-        }
-
-# --- MpesaPayment Model ---
+# --- Mpesa Payment ---
 class MpesaPayment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
@@ -219,14 +203,16 @@ class MpesaPayment(db.Model):
             "phone_number": self.phone_number,
             "timestamp": self.timestamp.isoformat() if self.timestamp else None
         }
+
+# --- Report Model ---
 class Report(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
     term = db.Column(db.String(50))
     year = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    image_url = db.Column(db.String(255), nullable=True)
 
-    # Relationships
     student = db.relationship("Student", backref="reports")
     results = db.relationship("Result", backref="report", lazy=True)
     fee_statement = db.relationship("Fee", backref="report", uselist=False)
@@ -239,9 +225,11 @@ class Report(db.Model):
             "year": self.year,
             "created_at": self.created_at.isoformat(),
             "results": [r.to_dict() for r in self.results],
-            "fee_statement": self.fee_statement.to_dict() if self.fee_statement else None
+            "fee_statement": self.fee_statement.to_dict() if self.fee_statement else None,
+            "image_url": self.image_url
         }
-    
+
+# --- Book Model ---
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), nullable=False)
@@ -260,6 +248,7 @@ class Book(db.Model):
             "available_copies": self.available_copies
         }
 
+# --- Borrow Record Model ---
 class BorrowRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
@@ -281,11 +270,10 @@ class BorrowRecord(db.Model):
             "fine": self.fine
         }
 
-
+# --- Dorm Room & Assignment ---
 class DormRoom(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    
     capacity = db.Column(db.Integer, nullable=False)
     current_occupants = db.Column(db.Integer, default=0)
 
@@ -293,7 +281,6 @@ class DormRoom(db.Model):
         return {
             "id": self.id,
             "name": self.name,
-        
             "capacity": self.capacity,
             "current_occupants": self.current_occupants
         }
@@ -305,7 +292,6 @@ class DormAssignment(db.Model):
     assigned_on = db.Column(db.DateTime, default=datetime.utcnow)
     left_on = db.Column(db.DateTime, nullable=True)
 
-    student = db.relationship('Student', backref='dorm_assignment')
     dorm = db.relationship('DormRoom', backref='assignments')
 
     def to_dict(self):
@@ -317,7 +303,7 @@ class DormAssignment(db.Model):
             "left_on": self.left_on.isoformat() if self.left_on else None
         }
 
-
+# --- Department, Course, Enrollment ---
 class Department(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
@@ -331,23 +317,11 @@ class Department(db.Model):
             "name": self.name
         }
 
-class Teacher(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=False)
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "department_id": self.department_id
-        }
-
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     is_compulsory = db.Column(db.Boolean, default=False)
-    group_name = db.Column(db.String(50), nullable=True)  
+    group_name = db.Column(db.String(50), nullable=True)
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
     enrollments = db.relationship('Enrollment', backref='course', lazy=True)
@@ -360,6 +334,7 @@ class Course(db.Model):
             "group_name": self.group_name,
             "department_id": self.department_id
         }
+
 class Enrollment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
@@ -371,5 +346,3 @@ class Enrollment(db.Model):
             "student_id": self.student_id,
             "course_id": self.course_id
         }
-
-

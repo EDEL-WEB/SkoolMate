@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.models import db, Appointment
+from backend.app.models import db, Appointment
 
 appointment_bp = Blueprint('appointment_bp', __name__, url_prefix='/appointments')
 

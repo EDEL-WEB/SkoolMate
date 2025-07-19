@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.models import User  # Adjust import as needed
-from app.routes.auth_routes import admin_required
+from backend.app.models import User
+from backend.app.utils.decorators import teacher_required
+from backend.app.utils.decorators import admin_required
 
 admin_bp = Blueprint('admin_bp', __name__, url_prefix='/admin')
 

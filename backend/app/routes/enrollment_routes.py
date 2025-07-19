@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.models import Enrollment, Student, Subject, db, User, Teacher
-from app.auth import admin_required, teacher_required
+from backend.app.models import Enrollment, Student, Subject, db, User, Teacher
+from backend.app.utils.decorators import teacher_required
+from backend.app.utils.decorators import admin_required
+
 
 enrollment_bp = Blueprint('enrollment_routes', __name__)
 

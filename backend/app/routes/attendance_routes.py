@@ -1,8 +1,12 @@
 # attendance_routes.py
 from flask import Blueprint, request, jsonify
-from app.models import db, Attendance, Student, Teacher
+from backend.app.models import db, Attendance, Student, Teacher
+
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from .auth_routes import teacher_required
+from backend.app.utils.decorators import teacher_required
+from backend.app.utils.decorators import admin_required
+
+
 
 attendance_bp = Blueprint("attendance", __name__)
 

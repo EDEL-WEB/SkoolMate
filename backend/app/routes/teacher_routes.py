@@ -1,7 +1,10 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
-from app.models import Teacher, db
-from app.auth import admin_required
+from backend.app.models import Teacher, db
+
+from backend.app.utils.decorators import admin_required
+
+from backend.app.utils.cloudinary_uploads import upload_image_to_cloudinary
 
 teacher_bp = Blueprint('teacher_routes', __name__)
 
@@ -30,9 +33,22 @@ def add_teacher():
 @admin_required
 def update_teacher(id):
     teacher = Teacher.query.get_or_404(id)
-    data = request.get_json()
+
+    # Support both JSON and multipart/form-data
+    if request.content_type and request.content_type.startswith('multipart/form-data'):
+        data = request.form
+    else:
+        data = request.get_json() or {}
+
     teacher.full_name = data.get('full_name', teacher.full_name)
     teacher.user_id = data.get('user_id', teacher.user_id)
+
+    # Handle image upload if present
+    if 'image' in request.files:
+        file = request.files['image']
+        image_url = upload_image_to_cloudinary(file)
+        teacher.image_url = image_url
+
     db.session.commit()
     return jsonify(teacher.to_dict()), 200
 
