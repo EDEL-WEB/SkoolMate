@@ -30,6 +30,7 @@ def create_app():
     from .routes.attendance_routes import attendance_bp
     from .routes.fees_routes import fees_bp
     from .routes.results_routes import results_bp
+    from .routes.auth_routes import auth_bp
 
     # Remove duplicate or incorrect blueprint imports
     # 🔥 DELETE this line: from backend.app.routes.teacher_routes import teacher_bp
@@ -49,6 +50,8 @@ def create_app():
     app.register_blueprint(attendance_bp)
     app.register_blueprint(fees_bp)
     app.register_blueprint(results_bp)
+    app.register_blueprint(auth_bp, url_prefix='/auth')
+
 
     # Create tables if not using Alembic migrations
    

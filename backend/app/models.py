@@ -16,7 +16,7 @@ class User(db.Model):
 
     def to_dict(self):
         return {
-            "id": self.id,
+            "id": self.id, 
             "username": self.username,
             "email": self.email,
             "role": self.role
@@ -59,6 +59,9 @@ class Teacher(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     full_name = db.Column(db.String(100), nullable=False)
     image_url = db.Column(db.String(255), nullable=True)
+    
+    
+    department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
     subjects = db.relationship('Subject', backref='teacher', lazy=True)
     appointments = db.relationship('Appointment', backref='teacher', lazy=True)
@@ -69,7 +72,8 @@ class Teacher(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "full_name": self.full_name,
-            "image_url": self.image_url
+            "image_url": self.image_url,
+            "department_id": self.department_id  # optionally include this
         }
 
 # --- Classroom Model ---
@@ -141,6 +145,7 @@ class Result(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
     exam_id = db.Column(db.Integer, db.ForeignKey('exam.id'))
+    report_id = db.Column(db.Integer, db.ForeignKey('report.id'))  # <-- Add this line
     score = db.Column(db.Float)
 
     def to_dict(self):
@@ -148,8 +153,10 @@ class Result(db.Model):
             "id": self.id,
             "student_id": self.student_id,
             "exam_id": self.exam_id,
+            "report_id": self.report_id,
             "score": self.score
         }
+
 
 # --- Attendance Model ---
 class Attendance(db.Model):
@@ -175,6 +182,9 @@ class Fee(db.Model):
     amount = db.Column(db.Float)
     due_date = db.Column(db.Date)
     is_paid = db.Column(db.Boolean, default=False)
+    
+
+    report_id = db.Column(db.Integer, db.ForeignKey('report.id'), nullable=True)
 
     def to_dict(self):
         return {
@@ -338,11 +348,13 @@ class Course(db.Model):
 class Enrollment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
-    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+    subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=False)
+
+    subject = db.relationship('Subject', backref='enrollments')
 
     def to_dict(self):
         return {
             "id": self.id,
             "student_id": self.student_id,
-            "course_id": self.course_id
+            "subject_id": self.subject_id
         }
