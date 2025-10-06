@@ -1,0 +1,228 @@
+.timetable-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.timetable-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.timetable-header h1 {
+  color: #2c3e50;
+  margin: 0;
+}
+
+.current-info {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.current-day, .current-time {
+  background: #3498db;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.timetable-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.day-column {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.day-column.current-day {
+  border: 2px solid #3498db;
+  box-shadow: 0 4px 20px rgba(52, 152, 219, 0.2);
+}
+
+.day-header {
+  background: #f8f9fa;
+  padding: 1rem;
+  text-align: center;
+  position: relative;
+}
+
+.day-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.today-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #e74c3c;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+.classes-list {
+  padding: 1rem;
+}
+
+.class-card {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  border-left: 4px solid #ecf0f1;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.class-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.class-card.current-class {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-left-color: #f39c12;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(52, 152, 219, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
+}
+
+.class-time {
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #3498db;
+  margin-bottom: 0.25rem;
+}
+
+.current-class .class-time {
+  color: #f39c12;
+}
+
+.class-subject {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.current-class .class-subject {
+  color: white;
+}
+
+.class-teacher {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  margin-bottom: 0.25rem;
+}
+
+.current-class .class-teacher {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.class-room {
+  font-size: 0.8rem;
+  color: #95a5a6;
+}
+
+.current-class .class-room {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.live-indicator {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #e74c3c;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.5; }
+}
+
+.no-classes {
+  text-align: center;
+  color: #7f8c8d;
+  font-style: italic;
+  padding: 2rem 0;
+}
+
+.timetable-legend {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.legend-color.current {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.legend-color.today {
+  background: #3498db;
+}
+
+@media (max-width: 1200px) {
+  .timetable-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .timetable-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .timetable-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .current-info {
+    justify-content: center;
+  }
+  
+  .timetable-legend {
+    flex-direction: column;
+    align-items: center;
+  }
+}
