@@ -41,7 +41,7 @@
   background: white;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+  z-index: 1100;
   max-height: 400px;
   overflow: hidden;
 }

@@ -134,7 +134,7 @@ const Sidebar = () => {
           items: [
             { path: '/student/reports', label: 'My Reports', icon: '📄', badge: null },
             { path: '/student/attendance', label: 'My Attendance', icon: '📅', badge: null },
-            { path: '/student/fees', label: 'Fee Status', icon: '💳', badge: null },
+            { path: '/student/fees', label: 'Fee Payment', icon: '💰', badge: null },
             { path: '/student/timetable', label: 'Timetable', icon: '🗓️', badge: null }
           ]
         }

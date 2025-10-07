@@ -21,6 +21,7 @@ import SubjectOverview from './pages/teacher/SubjectOverview'
 import MyReports from './pages/student/MyReports'
 import AttendanceView from './pages/student/AttendanceView'
 import Timetable from './pages/student/Timetable'
+import FeeManagement from './pages/student/FeeManagement'
 import UserManagement from './pages/admin/UserManagement'
 import Settings from './pages/admin/Settings'
 import './App.css'
@@ -174,6 +175,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['student']}>
                   <Timetable />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="student/fees" 
+              element={
+                <ProtectedRoute allowedRoles={['student']}>
+                  <FeeManagement />
                 </ProtectedRoute>
               } 
             />

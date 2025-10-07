@@ -1,56 +1,29 @@
-from flask import Blueprint, request, jsonify
-from backend.app.models import db, Classroom
-
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
-from backend.app.utils.decorators import teacher_required
-from backend.app.utils.decorators import admin_required
+from ..models import Classroom, db
 
+class_bp = Blueprint('class_bp', __name__, url_prefix='/classrooms')
 
-class_bp = Blueprint('class_routes', __name__)
-
-# Get all classes
-@class_bp.route('/classes', methods=['GET'])
+@class_bp.route('/', methods=['GET'])
 @jwt_required()
-def get_classes():
-    classes = Classroom.query.all()
-    return jsonify([c.to_dict() for c in classes]), 200
+def get_classrooms():
+    classrooms = Classroom.query.all()
+    return jsonify([classroom.to_dict() for classroom in classrooms])
 
-# Get one class
-@class_bp.route('/classes/<int:id>', methods=['GET'])
+@class_bp.route('/', methods=['POST'])
 @jwt_required()
-def get_class(id):
-    class_ = Classroom.query.get_or_404(id)
-    return jsonify(class_.to_dict()), 200
-
-# Create class
-@class_bp.route('/classes', methods=['POST'])
-@jwt_required()
-@admin_required
-def create_class():
+def create_classroom():
     data = request.get_json()
-    new_class = Classroom(name=data['name'], teacher_id=data.get('teacher_id'))
-    db.session.add(new_class)
-    db.session.commit()
-    return jsonify(new_class.to_dict()), 201
-
-# Update class
-@class_bp.route('/classes/<int:id>', methods=['PATCH'])
-@jwt_required()
-@admin_required
-def update_class(id):
-    class_ = Classroom.query.get_or_404(id)
-    data = request.get_json()
-    class_.name = data.get('name', class_.name)
-    class_.teacher_id = data.get('teacher_id', class_.teacher_id)
-    db.session.commit()
-    return jsonify(class_.to_dict()), 200
-
-# Delete class
-@class_bp.route('/classes/<int:id>', methods=['DELETE'])
-@jwt_required()
-@admin_required
-def delete_class(id):
-    class_ = Classroom.query.get_or_404(id)
-    db.session.delete(class_)
-    db.session.commit()
-    return jsonify({"message": "Class deleted"}), 200
+    
+    existing = Classroom.query.filter_by(name=data['name']).first()
+    if existing:
+        return jsonify({"error": "Classroom already exists"}), 409
+    
+    try:
+        classroom = Classroom(name=data['name'])
+        db.session.add(classroom)
+        db.session.commit()
+        return jsonify(classroom.to_dict()), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Failed to create classroom"}), 500

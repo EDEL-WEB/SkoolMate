@@ -13,6 +13,7 @@ sqlalchemy = "*"
 cloudinary = "*"
 flask-migrate = "*"
 flask-sqlalchemy = "*"
+flask-jwt-extended = "*"
 
 [dev-packages]
 

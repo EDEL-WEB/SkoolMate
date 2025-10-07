@@ -1,4 +1,4 @@
-from backend.app import create_app  # ✅ Fix this import
+from backend.app import create_app
 
 app = create_app()
 

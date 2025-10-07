@@ -14,32 +14,107 @@ const NotificationSystem = () => {
   }, [user])
 
   const generateNotifications = () => {
-    const mockNotifications = [
-      {
-        id: 1,
-        type: 'grade',
-        title: 'New Grade Posted',
-        message: 'Your Mathematics exam result is now available',
-        time: '2 hours ago',
-        read: false
-      },
-      {
-        id: 2,
-        type: 'fee',
-        title: 'Fee Payment Reminder',
-        message: 'Term 2 fees are due in 5 days',
-        time: '1 day ago',
-        read: false
-      },
-      {
-        id: 3,
-        type: 'attendance',
-        title: 'Attendance Alert',
-        message: 'Your attendance is below 75%',
-        time: '3 days ago',
-        read: true
-      }
-    ]
+    let mockNotifications = []
+    
+    if (user?.role === 'student') {
+      mockNotifications = [
+        {
+          id: 1,
+          type: 'grade',
+          title: 'New Grade Posted',
+          message: 'Your Mathematics exam result is now available',
+          time: '2 hours ago',
+          read: false
+        },
+        {
+          id: 2,
+          type: 'fee',
+          title: 'Fee Payment Reminder',
+          message: 'Term 2 fees are due in 5 days',
+          time: '1 day ago',
+          read: false
+        },
+        {
+          id: 3,
+          type: 'attendance',
+          title: 'Attendance Alert',
+          message: 'Your attendance is below 75%',
+          time: '3 days ago',
+          read: true
+        }
+      ]
+    } else if (user?.role === 'teacher') {
+      mockNotifications = [
+        {
+          id: 1,
+          type: 'assignment',
+          title: 'Assignment Submissions',
+          message: '15 new assignments submitted for review',
+          time: '1 hour ago',
+          read: false
+        },
+        {
+          id: 2,
+          type: 'attendance',
+          title: 'Low Attendance Alert',
+          message: '3 students have attendance below 75%',
+          time: '4 hours ago',
+          read: false
+        },
+        {
+          id: 3,
+          type: 'meeting',
+          title: 'Faculty Meeting',
+          message: 'Department meeting scheduled for tomorrow 2 PM',
+          time: '1 day ago',
+          read: true
+        },
+        {
+          id: 4,
+          type: 'grade',
+          title: 'Grade Deadline',
+          message: 'Submit grades for Physics by Friday',
+          time: '2 days ago',
+          read: false
+        }
+      ]
+    } else if (user?.role === 'admin') {
+      mockNotifications = [
+        {
+          id: 1,
+          type: 'system',
+          title: 'System Backup Complete',
+          message: 'Daily backup completed successfully',
+          time: '30 minutes ago',
+          read: false
+        },
+        {
+          id: 2,
+          type: 'enrollment',
+          title: 'New Enrollments',
+          message: '25 new student enrollments pending approval',
+          time: '2 hours ago',
+          read: false
+        },
+        {
+          id: 3,
+          type: 'fee',
+          title: 'Fee Collection Report',
+          message: '85% fee collection completed for this term',
+          time: '5 hours ago',
+          read: true
+        },
+        {
+          id: 4,
+          type: 'alert',
+          title: 'Server Maintenance',
+          message: 'Scheduled maintenance this weekend',
+          time: '1 day ago',
+          read: false
+        }
+      ]
+    }
+    
     setNotifications(mockNotifications)
   }
 
@@ -58,6 +133,11 @@ const NotificationSystem = () => {
       case 'grade': return '📊'
       case 'fee': return '💰'
       case 'attendance': return '📅'
+      case 'assignment': return '📝'
+      case 'meeting': return '🤝'
+      case 'system': return '⚙️'
+      case 'enrollment': return '👥'
+      case 'alert': return '⚠️'
       default: return '📢'
     }
   }

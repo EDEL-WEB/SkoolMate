@@ -50,7 +50,9 @@ class Student(db.Model):
             "date_of_birth": self.date_of_birth.isoformat() if self.date_of_birth else None,
             "parent_contact": self.parent_contact,
             "classroom_id": self.classroom_id,
-            "image_url": self.image_url
+            "image_url": self.image_url,
+            "user": self.user.to_dict() if self.user else None,
+            "classroom": self.classroom.to_dict() if self.classroom else None
         }
 
 # --- Teacher Model ---
@@ -73,7 +75,9 @@ class Teacher(db.Model):
             "user_id": self.user_id,
             "full_name": self.full_name,
             "image_url": self.image_url,
-            "department_id": self.department_id  # optionally include this
+            "department_id": self.department_id,
+            "user": self.user.to_dict() if self.user else None,
+            "department": self.department.to_dict() if self.department else None
         }
 
 # --- Classroom Model ---
@@ -115,13 +119,19 @@ class Subject(db.Model):
     name = db.Column(db.String(50), nullable=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'))
     classroom_id = db.Column(db.Integer, db.ForeignKey('classroom.id'))
+    department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
         return {
             "id": self.id,
             "name": self.name,
             "teacher_id": self.teacher_id,
-            "classroom_id": self.classroom_id
+            "classroom_id": self.classroom_id,
+            "department_id": self.department_id,
+            "teacher": self.teacher.to_dict() if self.teacher else None,
+            "department": self.department.to_dict() if self.department else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None
         }
 
 # --- Exam Model ---
@@ -130,6 +140,8 @@ class Exam(db.Model):
     name = db.Column(db.String(100))
     date = db.Column(db.DateTime, default=datetime.utcnow)
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'))
+    
+    subject = db.relationship('Subject', backref='exams')
     results = db.relationship('Result', backref='exam', lazy=True)
 
     def to_dict(self):
@@ -137,7 +149,8 @@ class Exam(db.Model):
             "id": self.id,
             "name": self.name,
             "date": self.date.isoformat() if self.date else None,
-            "subject_id": self.subject_id
+            "subject_id": self.subject_id,
+            "subject": self.subject.to_dict() if self.subject else None
         }
 
 # --- Result Model ---
@@ -154,7 +167,9 @@ class Result(db.Model):
             "student_id": self.student_id,
             "exam_id": self.exam_id,
             "report_id": self.report_id,
-            "score": self.score
+            "score": self.score,
+            "exam": self.exam.to_dict() if self.exam else None,
+            "student": self.student.to_dict() if self.student else None
         }
 
 
@@ -169,30 +184,35 @@ class Attendance(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
-            "student": self.student.to_dict(),
-            "date": self.date.isoformat(),
+            "student_id": self.student_id,
+            "teacher_id": self.teacher_id,
+            "date": self.date.isoformat() if self.date else None,
             "status": self.status,
-            "teacher": self.teacher.to_dict()
+            "student": self.student.to_dict() if self.student else None,
+            "teacher": self.teacher.to_dict() if self.teacher else None
         }
 
 # --- Fee Model ---
 class Fee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
-    amount = db.Column(db.Float)
-    due_date = db.Column(db.Date)
+    term = db.Column(db.String(50), nullable=False)
+    amount_due = db.Column(db.Float, nullable=False)
+    amount_paid = db.Column(db.Float, default=0.0)
+    due_date = db.Column(db.Date, nullable=True)
     is_paid = db.Column(db.Boolean, default=False)
-    
-
     report_id = db.Column(db.Integer, db.ForeignKey('report.id'), nullable=True)
 
     def to_dict(self):
         return {
             "id": self.id,
             "student_id": self.student_id,
-            "amount": self.amount,
+            "term": self.term,
+            "amount_due": self.amount_due,
+            "amount_paid": self.amount_paid,
             "due_date": self.due_date.isoformat() if self.due_date else None,
-            "is_paid": self.is_paid
+            "is_paid": self.is_paid,
+            "report_id": self.report_id
         }
 
 # --- Mpesa Payment ---
@@ -320,6 +340,7 @@ class Department(db.Model):
 
     teachers = db.relationship('Teacher', backref='department', lazy=True)
     courses = db.relationship('Course', backref='department', lazy=True)
+    subjects = db.relationship('Subject', backref='department', lazy=True)
 
     def to_dict(self):
         return {
@@ -334,7 +355,6 @@ class Course(db.Model):
     group_name = db.Column(db.String(50), nullable=True)
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
-    enrollments = db.relationship('Enrollment', backref='course', lazy=True)
 
     def to_dict(self):
         return {
@@ -349,6 +369,7 @@ class Enrollment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     subject = db.relationship('Subject', backref='enrollments')
 
@@ -356,5 +377,30 @@ class Enrollment(db.Model):
         return {
             "id": self.id,
             "student_id": self.student_id,
-            "subject_id": self.subject_id
+            "subject_id": self.subject_id,
+            "created_at": getattr(self, 'created_at', None).isoformat() if getattr(self, 'created_at', None) else None,
+            "student": self.student.to_dict() if self.student else None,
+            "subject": self.subject.to_dict() if self.subject else None
+        }
+
+class FeePayment(db.Model):
+    __tablename__ = 'fee_payments'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    payment_method = db.Column(db.String(50), nullable=False)
+    reference_number = db.Column(db.String(100), unique=True, nullable=False)
+    status = db.Column(db.String(20), default='pending')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'student_id': self.student_id,
+            'amount': self.amount,
+            'payment_method': self.payment_method,
+            'reference_number': self.reference_number,
+            'status': self.status,
+            'created_at': self.created_at.isoformat() if self.created_at else None
         }

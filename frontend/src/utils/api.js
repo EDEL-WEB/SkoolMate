@@ -103,7 +103,8 @@ export const teacherAPI = {
 export const studentAPI = {
   getDashboard: () => api.get('/student/dashboard'),
   getMyReports: () => api.get('/student/reports'),
-  getMyFees: () => api.get('/student/fees'),
+  getFees: () => api.get('/student/fees'),
+  makePayment: (data) => api.post('/student/fees/pay', data),
   getMyResults: () => api.get('/student/results'),
   getMyAttendance: () => api.get('/student/attendance'),
 }
